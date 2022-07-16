@@ -1,6 +1,8 @@
 ## app.R ##
 library(shinydashboard)
 library(ggplot2)
+library(tidyverse)
+library(scales)
 
 ui <- dashboardPage(
   dashboardHeader(title = "DivInteractiv"),
@@ -13,14 +15,14 @@ ui <- dashboardPage(
   dashboardBody(
     tabItems(
       # First tab content
-      tabItem(tabName = "dashboard", h2(tags$b("How much money do I need to invest to get monthly dividend income?"), align = 'center'),
-              tags$br(), h3("You set your monthly dividend goal..."),
+      tabItem(tabName = "dashboard", h2(tags$b("How much money do I need to invest to get a yearly dividend income?"), align = 'center'),
+              tags$br(), h3("You set your annual dividend goal..."),
               fluidRow(
               #mainPanel(
                 box(
                   title = " ", status = "warning",
                   " ",  
-                  sliderInput("slider", "Desired dollars per month in dividend income:", 0, 8300, 5000)
+                  sliderInput("slider", "Desired dollars per year in dividend income:", 0, 10000, 5000)
                 )),
               h3("...and then see how much you need to invest.", align = 'right'),
                 fluidRow(
@@ -64,33 +66,35 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output) {
-  set.seed(122)
-  #histdata <- rnorm(500)
   
   output$plot1 <- renderPlot({
-    #data <- histdata[seq_len(input$slider)]
-    #barplot(data_bar_plot)
-    # Do calculations for the app
-    dp1 <- input$slider*0.0125
-    dp2 <- input$slider*0.025
-    div_data <- data.frame(
-      Investments = c("ETF1", "ETF2"),
-      Dollars_needed = c(dp1, dp2)
-    )
-    ggplot(data = div_data, aes(x=Investments, y=Dollars_needed)) + ylim(0, (max(div_data$Dollars_needed)+max(div_data$Dollars_needed)*0.07)) + 
+    Investments <- c("FSDIX", "SCHD", "APLE", "FPURX", "FZROX")
+    Yield <- c(0.025, 0.0341, 0.0387, 0.0198, 0.011)
+    df <- data.frame(Investments, Yield)
+    df %>% add_column(Dollars_needed = NA) %>% add_column(Dollars_reformat = NA) 
+    
+    for (i in 1:length(df$Investments)){
+      dp = input$slider/df$Yield[i]
+      df[i,"Dollars_needed"] <- dp
+      dp_format <- paste0("$", format(ceiling(dp), big.mark=",", scientific = F))
+      df[i,"Dollars_reformat"] <- dp_format
+      div_data <- df
+    }
+    options(scipen = 999)
+    ggplot(data = div_data, aes(x=Investments, y=Dollars_needed)) + ylim(0, (max(div_data$Dollars_needed)+max(div_data$Dollars_needed))) + 
       geom_bar(stat = "identity") + geom_col(fill = "#0099f9") + theme_classic() + 
       labs(
-        title = "Dollars to be invested \n across different vehicles",
+        title = "Dollars needed to be invested \n across different vehicles",
         caption = "Chart by DivInteractiv", 
         x = "Prospective Investments",
-        y = "Dollars to be invested (USD)"
+        y = "Approximate dollars \n to be invested (USD)"
       ) + theme(plot.title = element_text(hjust = 0.5), 
                 plot.caption = element_text(face = "italic") 
                 #axis.title.x = element_text(face = "bold"), 
                 #axis.title.y = element_text(face = "bold"), 
                 #title = element_text(face = "bold")
-                ) +
-      geom_text(aes(label = Dollars_needed), vjust = -0.5, size = 3, fontface = "bold")
+                ) + scale_y_continuous(labels = scales::comma) +
+      geom_text(aes(label = Dollars_reformat), vjust = -0.5, size = 3, fontface = "bold")
   })
 }
 
