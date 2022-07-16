@@ -11,3 +11,5 @@ My code for Women Who Code's Hackathon for Social Good in June-July 2022.
 * June 28: Coded first version of the app, especially the different parts of the navigation bar. I was aided greatly by [this tutorial](https://rstudio.github.io/shinydashboard/).
 * June 29-July 1: Sick so didn't get any work done on the app but did watch WWC's Mentorship Session on Zoom. 
 * July 2: Figured out how to deploy my Shiny app, using information from [shinyapps.io](https://shiny.rstudio.com/deploy/). Also worked on a draft of the project's Hackathon submission statement and presentation.
+* July 9-10: Worked on plottign on the "Interactive calculator" page.
+* July 16: Completed first draft of the interactive calculator using 5 ETFs. 
